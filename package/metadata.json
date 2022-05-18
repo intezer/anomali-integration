@@ -1,0 +1,66 @@
+{
+    "title": "Intezer Analyze",
+    "transform_set_name": "Intezer",
+    "description": "Enrich Hash information with IOCs and TTPs by Intezer Analyze.",
+    "icons": {
+        "icon_display": "intezer_logo.png",
+        "icon_thumbnail": "thumbnail.png"
+    },
+    "sdk_type": "anomali",
+    "app_name": "com.intezer.Intezer_Context_Enrichment",
+    "version": "1.0.0",
+    "is_python3": true,
+    "author": "Intezer Labs.",
+    "license": "Apache-2.0 license",
+    "source_url": "https://github.com/intezer/anomali-integration",
+    "credentials": [
+        {
+            "name": "api_key",
+            "description": "API Key for Intezer",
+            "label": "API Key",
+            "required": true,
+            "sensitive": true,
+            "rank": 1
+        },
+        {
+            "name": "optional_analysis_wait_timeout",
+            "description": "How much time to wait for analysis to finish",
+            "label": "Analysis timeout in seconds (Optional)",
+            "required": false,
+            "sensitive": false,
+            "rank": 2
+        },
+        {
+            "name": "optional_only_private_analysis",
+            "description": "Whether to query only private analyses. (Default false)",
+            "label": "Private analysis (Optional)",
+            "required": false,
+            "sensitive": false,
+            "rank": 3
+        }
+    ],
+    "transforms": [
+        {
+            "transform_name": "activation",
+            "activation": true,
+            "pivoting": false,
+            "enrichment": false,
+            "display_name": "Activate",
+            "description": "Activation function to validate the api_key and activate the sample app.",
+            "parameters": "intezer_anomali_enrichment.py activation",
+            "entity_type": "anomali.Hash",
+            "sample_entity_value": "anomali.com",
+            "rank": 3
+        },
+        {
+            "transform_name": "enrichHash",
+            "pivoting": false,
+            "enrichment": true,
+            "display_name": "Intezer",
+            "description": "Find and display useful information about a hash",
+            "parameters": "intezer_anomali_enrichment.py enrichHash",
+            "entity_type": "anomali.Hash",
+            "rank": 1
+        }
+    ]
+}
