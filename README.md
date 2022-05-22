@@ -1,4 +1,4 @@
-# Intezer Anomali integration
+# Intezer Anomali Integration
 [Intezer Analyze](https://analyze.intezer.com) integration with anomali provide hash enrichment.
 
 ## How does it work?

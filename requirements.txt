@@ -1,3 +1,6 @@
 requests==2.25.1
 xmljson==0.2.1
 python-dateutil
+# for documents
+grip==4.6.1
+weasyprint=55.0
