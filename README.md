@@ -12,7 +12,7 @@ To activate the Intezer Analyze enrichment:
 3. Search for Intezer Analyze, and click "Get Access".
 4. Click "I have already registered" and enter your Intezer API Key found in [account details](https://analyze.intezer.com/account-details).
 5. Configure additional parameters:
-   * Timeout waiting for an analysis to finish (optional), the default is to wait until the analysis is finished.
+   * Timeout waiting for an analysis to finish in seconds (optional, max is 25), the default is to wait 25 seconds.
    * Should the querying of the latest analysis only return private analysis, default is false. 
    Use this to avoid consuming quota everytime you query a hash.
 6. If errors occur, contact support@intezer.com for assistance.

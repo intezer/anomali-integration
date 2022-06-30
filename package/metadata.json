@@ -12,7 +12,7 @@
     "is_python3": true,
     "author": "Intezer Labs.",
     "license": "Apache-2.0 license",
-    "source_url": "https://github.com/intezer/anomali-integration",
+    "source_url": "https://intezer.com",
     "credentials": [
         {
             "name": "api_key",
@@ -25,7 +25,7 @@
         {
             "name": "optional_analysis_wait_timeout",
             "description": "How much time to wait for analysis to finish",
-            "label": "Analysis timeout in seconds (Optional)",
+            "label": "Analysis timeout in seconds (Optional, max: 25)",
             "required": false,
             "sensitive": false,
             "rank": 2
@@ -49,7 +49,6 @@
             "description": "Activation function to validate the api_key and activate the sample app.",
             "parameters": "intezer_anomali_enrichment.py activation",
             "entity_type": "anomali.Hash",
-            "sample_entity_value": "anomali.com",
             "rank": 3
         },
         {

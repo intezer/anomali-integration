@@ -1194,8 +1194,8 @@ from AnomaliEnrichment import TableWidget
 from AnomaliEnrichment import TextWidget
 
 SEVERITY_TO_NAME = {1: 'low', 2: 'medium', 3: 'high'}
-VERDICT_TO_COLOR = {'malicious': 'red', 'trusted': 'green'}
 REQUESTER = 'anomali'
+MAX_TIMEOUT = 25
 
 
 def activation(api_key: str):
@@ -1218,11 +1218,6 @@ def enrich_hash(ae: AnomaliEnrichment, hash_value: str, wait_timeout: Optional[d
 
     analysis_details = file_analysis.result()
 
-    verdict = analysis_details['verdict']
-    family_name = analysis_details.get('family_name')
-    ae.addWidget(TextWidget(ItemInWidget(ItemTypes.String, verdict, backgroundColor=VERDICT_TO_COLOR.get(verdict))))
-    if family_name:
-        ae.addWidget(TextWidget(ItemInWidget(ItemTypes.String, family_name)))
     basic_table_widget = TableWidget('Analysis Details', ['Field', 'Value'], columnWidths=['20%', '80%'])
 
     for key, value in analysis_details.items():
@@ -1330,14 +1325,24 @@ def main():
         try:
             wait_timeout = int(wait_timeout)
             if wait_timeout < 1:
-                ae.addMessage("ERROR", 'Wrong optional_analysis_wait_timeout format, must be a positive number ')
-                ae.addException('Input Error : Wrong optional_analysis_wait_timeout format')
+                message = 'Wrong optional_analysis_wait_timeout, must be a positive number'
+                ae.addMessage('ERROR', message)
+                ae.addException(f'Input Error: {message}')
                 return
-            wait_timeout = datetime.timedelta(seconds=wait_timeout)
+            elif wait_timeout > MAX_TIMEOUT:
+                message = f'Wrong optional_analysis_wait_timeout, must be lower or equal to {MAX_TIMEOUT}'
+                ae.addMessage('ERROR', message)
+                ae.addException(f'Input Error: {message}')
+                return
         except ValueError:
-            ae.addMessage("ERROR", 'Wrong optional_analysis_wait_timeout format, must be a number ')
-            ae.addException('Input Error : Wrong optional_analysis_wait_timeout format')
+            message = 'Wrong optional_analysis_wait_timeout format, must be a number'
+            ae.addMessage('ERROR', message)
+            ae.addException(f'Input Error: {message}')
             return
+    else:
+        wait_timeout = MAX_TIMEOUT
+
+    wait_timeout = datetime.timedelta(seconds=wait_timeout)
 
     if transform_name is None:
         ae.addException('Transform Name is not provided')
