@@ -1203,7 +1203,7 @@ def activation(api_key: str):
     get_global_api().request_with_refresh_expired_access_token('GET', '/accounts/me')
 
 
-def enrich_hash(ae: AnomaliEnrichment, hash_value: str, wait_timeout: Optional[datetime.timedelta], private_only: bool):
+def enrich_hash(ae: AnomaliEnrichment, hash_value: str, wait_timeout: datetime.timedelta, private_only: bool):
     file_analysis = FileAnalysis.from_latest_hash_analysis(hash_value, private_only=private_only, requester=REQUESTER)
     if not file_analysis:
         file_analysis = FileAnalysis(file_hash=hash_value)
@@ -1213,7 +1213,14 @@ def enrich_hash(ae: AnomaliEnrichment, hash_value: str, wait_timeout: Optional[d
             ae.addWidget(TextWidget(ItemInWidget(ItemTypes.String, 'Hash not found in Intezer')))
             return
         except TimeoutError:
-            ae.addWidget(TextWidget(ItemInWidget(ItemTypes.String, 'Time out waiting to Intezer result')))
+            ae.addWidget(TextWidget(ItemInWidget(
+                ItemTypes.String,
+                'Time out waiting to Intezer result, you can check the result at:'))
+            )
+            ae.addWidget(TextWidget(ItemInWidget(
+                ItemTypes.Link,
+                f'https://analyze.intezer.com/analyses/{file_analysis.analysis_id}'))
+            )
             return
 
     analysis_details = file_analysis.result()
