@@ -1,0 +1,61 @@
+import datetime
+import time
+from typing import Optional
+
+from api import IntezerApi
+from api import get_global_api
+from consts import CHECK_STATUS_INTERVAL
+from consts import AnalysisStatusCode
+import errors
+
+from http import HTTPStatus
+
+
+class Operation:
+
+    def __init__(self, status: AnalysisStatusCode, url: str, api: IntezerApi = None):
+        self.status = status
+        self.url = url
+        self.result = None
+        self._api = api or get_global_api()
+
+    def get_result(self):
+        if self.status != AnalysisStatusCode.FINISH:
+
+            operation_result = self._api.get_url_result(self.url)
+
+            if handle_response_status(operation_result.status_code):
+                self.result = operation_result.json()['result']
+                self.status = AnalysisStatusCode.FINISH
+            else:
+                raise errors.SubAnalysisOperationStillRunningError('operation')
+        return self.result
+
+    def wait_for_completion(self,
+                            interval: int = None,
+                            sleep_before_first_check=False,
+                            wait_timeout: Optional[datetime.timedelta] = None) -> None:
+        start_time = datetime.datetime.utcnow()
+        if not interval:
+            interval = CHECK_STATUS_INTERVAL
+
+        if sleep_before_first_check:
+            time.sleep(interval)
+        operation_result = self._api.get_url_result(self.url)
+
+        while not handle_response_status(operation_result.status_code):
+            timeout_passed = wait_timeout and datetime.datetime.utcnow() - start_time > wait_timeout
+            if timeout_passed:
+                raise TimeoutError
+            time.sleep(interval)
+            operation_result = self._api.get_url_result(self.url)
+
+        self.status = AnalysisStatusCode.FINISH
+        self.result = operation_result.json()['result']
+
+
+def handle_response_status(status):
+    if status not in (HTTPStatus.OK, HTTPStatus.ACCEPTED):
+        raise errors.IntezerError('Error in response status code:{}'.format(status))
+
+    return status == HTTPStatus.OK
