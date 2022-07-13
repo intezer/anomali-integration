@@ -1188,6 +1188,7 @@ def _assert_analysis_status(response: dict):
 # endregion
 
 from AnomaliEnrichment import AnomaliEnrichment
+from AnomaliEnrichment import CompositeItem
 from AnomaliEnrichment import ItemInWidget
 from AnomaliEnrichment import ItemTypes
 from AnomaliEnrichment import TableWidget
@@ -1251,16 +1252,15 @@ def enrich_hash(ae: AnomaliEnrichment, hash_value: str, wait_timeout: datetime.t
 
             for ioc in iocs['network']:
                 ioc_type = ioc['type']
-                if ioc_type == 'ip':
-                    cell_type = ItemTypes.IPv4
-                elif ioc_type == 'url':
-                    cell_type = ItemTypes.URL
-                elif ioc_type == ' domain':
-                    cell_type = ItemTypes.Domain
+                type_title = 'IP' if ioc_type == 'ip' else ioc_type.capitalize()
+                item_value = item_label = ioc['ioc']
+                if ioc_type in ('ip', 'url', 'domain'):
+                    item_value = f"detail/v2/{ioc_type}?value={ioc['ioc']}"
+                    cell_type = ItemTypes.Link
                 else:
                     cell_type = ItemTypes.String
-                network_iocs_table_widget.addRowOfItems([ItemInWidget(cell_type, ioc['ioc']),
-                                                         ItemInWidget(ItemTypes.String, ioc_type.capitalize()),
+                network_iocs_table_widget.addRowOfItems([ItemInWidget(cell_type, item_value, item_label),
+                                                         ItemInWidget(ItemTypes.String, type_title),
                                                          ItemInWidget(ItemTypes.String, ','.join(ioc['source']))])
 
             ae.addWidget(network_iocs_table_widget)
@@ -1274,7 +1274,7 @@ def enrich_hash(ae: AnomaliEnrichment, hash_value: str, wait_timeout: datetime.t
                 if file.get('family'):
                     classification = f'{classification} ({file["family"]})'
                 files_iocs_table_widget.addRowOfItems([
-                    ItemInWidget(ItemTypes.Hash, file['sha256']),
+                    ItemInWidget(ItemTypes.Link, f"detail/v2/hash?value={file['sha256']}", file['sha256']),
                     ItemInWidget(ItemTypes.String, file['path']),
                     ItemInWidget(ItemTypes.String, file['type'].replace('_', ' ').capitalize()),
                     ItemInWidget(ItemTypes.String, classification),
@@ -1288,17 +1288,20 @@ def enrich_hash(ae: AnomaliEnrichment, hash_value: str, wait_timeout: datetime.t
                                         columnWidths=['35%', '30%', '5%', '30%'])
         for ttp in sorted(file_analysis.dynamic_ttps, key=lambda t: t['severity'], reverse=True):
             if 'data' in ttp:
-                details = []
+                details_item = CompositeItem(onSeparateLines=True)
                 for additional_data in ttp['data']:
-                    details.append(','.join(f'{key}:{value}' for key, value in additional_data.items()))
-                details = '\n'.join(details)
+                    details_item.addItemInWidget(
+                        ItemInWidget(ItemTypes.String,
+                                     ','.join(f'{key}:{value}' for key, value in additional_data.items()))
+                    )
             else:
-                details = ''
+                details_item = ItemInWidget(ItemTypes.String, '')
+
             ttps_table_widget.addRowOfItems([
                 ItemInWidget(ItemTypes.String, ttp.get('ttp', {}).get('ttp', '')),
                 ItemInWidget(ItemTypes.String, ttp['description']),
                 ItemInWidget(ItemTypes.String, SEVERITY_TO_NAME[ttp['severity']].capitalize()),
-                ItemInWidget(ItemTypes.String, details)
+                details_item
             ])
 
         ae.addWidget(ttps_table_widget)
