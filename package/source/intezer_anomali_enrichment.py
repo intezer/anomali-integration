@@ -99,7 +99,7 @@ def enrich_hash(ae: AnomaliEnrichment, hash_value: str, wait_timeout: datetime.t
             ae.addWidget(files_iocs_table_widget)
 
     if file_analysis.dynamic_ttps:
-        ttps_table_widget = TableWidget('Signatures',
+        ttps_table_widget = TableWidget('TTPs',
                                         ['MITRE ATT&CK', 'Technique', 'Severity', 'Details'],
                                         columnWidths=['35%', '30%', '5%', '30%'])
         for ttp in sorted(file_analysis.dynamic_ttps, key=lambda t: t['severity'], reverse=True):

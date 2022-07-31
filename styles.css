@@ -5,3 +5,8 @@
 #readme {
     border-width: 0 !important;
 }
+
+html *
+{
+    font-family: "Open Sans", Calibri, Candara, Arial, sans-serif; /*For some reason weasyprint messes the numbers*/
+}
