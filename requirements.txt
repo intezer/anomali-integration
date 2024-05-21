@@ -1,4 +1,4 @@
-requests==2.25.1
+requests==2.32.0
 xmljson==0.2.1
 python-dateutil
 # for documents
